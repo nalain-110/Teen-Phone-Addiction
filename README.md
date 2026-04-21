@@ -24,13 +24,13 @@ python app.py
 
 Then open: http://localhost:5000
 
-## Pages
+# Pages
 - `/`          → Homepage with dataset statistics
 - `/predict`   → AI prediction form (21 features → daily usage hours)
 - `/dashboard` → Interactive charts and analytics
 - `/about`     → Project & model details
 
-## Model
+# Model
 - Algorithm: KNN Regressor (k=2)
 - Features: 21 behavioral & psychological
 - Target: Daily_Usage_Hours
