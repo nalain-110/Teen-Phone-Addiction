@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block title %}PhoneWatch AI — Teen Phone Addiction Detection{% endblock %}
+{% block content %}
+
+<style>
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    top: 60%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-tag {
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 10vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: 4px;
+    margin: 1.5rem 0 1rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero-headline .line1 { display: block; color: var(--text); }
+  .hero-headline .line2 {
+    display: block;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    max-width: 540px;
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .stats-band {
+    padding: 4rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, transparent, rgba(0,229,255,0.02), transparent);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 2rem 1rem;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .stat-card:nth-child(1) { animation-delay: 0s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.2s; }
+  .stat-card:nth-child(4) { animation-delay: 0.3s; }
+  .stat-card:nth-child(5) { animation-delay: 0.4s; }
+  .stat-card:nth-child(6) { animation-delay: 0.5s; }
+
+  .stat-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 0.5rem;
+  }
+
+  .features-section {
+    padding: 5rem 0;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    letter-spacing: 3px;
+    margin-top: 0.5rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    padding: 2rem;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .feature-card:hover::after { transform: scaleX(1); }
+
+  .feature-card.cyan { --gradient: linear-gradient(90deg, var(--accent), transparent); }
+  .feature-card.red { --gradient: linear-gradient(90deg, var(--accent2), transparent); }
+  .feature-card.purple { --gradient: linear-gradient(90deg, var(--accent3), transparent); }
+  .feature-card.warn { --gradient: linear-gradient(90deg, var(--warn), transparent); }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .cta-section {
+    padding: 5rem 0;
+    text-align: center;
+  }
+
+  .cta-box {
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(168,85,247,0.05));
+    border: 1px solid rgba(0,229,255,0.15);
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-box::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent3), transparent);
+  }
+
+  .cta-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    letter-spacing: 3px;
+    margin-bottom: 1rem;
+  }
+
+  .cta-sub {
+    color: var(--muted);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .ticker {
+    overflow: hidden;
+    background: rgba(0,229,255,0.05);
+    border-top: 1px solid rgba(0,229,255,0.1);
+    border-bottom: 1px solid rgba(0,229,255,0.1);
+    padding: 0.6rem 0;
+    margin-bottom: 3rem;
+  }
+
+  .ticker-inner {
+    display: flex;
+    gap: 4rem;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+</style>
+
+<!-- Ticker -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <span>📱 KNN REGRESSOR</span>
+    <span>•</span>
+    <span>🧠 ML-POWERED ANALYSIS</span>
+    <span>•</span>
+    <span>📊 REAL-TIME PREDICTION</span>
+    <span>•</span>
+    <span>🔬 TEEN WELLNESS INSIGHTS</span>
+    <span>•</span>
+    <span>📱 KNN REGRESSOR</span>
+    <span>•</span>
+    <span>🧠 ML-POWERED ANALYSIS</span>
+    <span>•</span>
+    <span>📊 REAL-TIME PREDICTION</span>
+    <span>•</span>
+    <span>🔬 TEEN WELLNESS INSIGHTS</span>
+    <span>•</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="chip hero-tag">
+    <span>●</span> AI-Powered Teen Wellness Platform
+  </div>
+
+  <h1 class="hero-headline">
+    <span class="line1">DETECT</span>
+    <span class="line2">ADDICTION</span>
+    <span class="line1">EARLY</span>
+  </h1>
+
+  <p class="hero-sub">
+    Advanced machine learning model to predict and assess teen phone addiction levels.
+    Get instant insights to protect the next generation's mental health.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="/predict" class="btn btn-primary">
+      🤖 Run Prediction
+    </a>
+    <a href="/dashboard" class="btn btn-outline">
+      📊 View Dashboard
+    </a>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<section class="stats-band">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" style="color:var(--accent)">{{ stats.total_students }}</div>
+        <div class="stat-label">Students Analyzed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📱</div>
+        <div class="stat-value" style="color:var(--accent2)">{{ stats.avg_daily_usage }}h</div>
+        <div class="stat-label">Avg Daily Usage</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" style="color:var(--warn)">{{ stats.avg_addiction }}/10</div>
+        <div class="stat-label">Avg Addiction Level</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-value" style="color:var(--accent2)">{{ stats.high_addiction_pct }}%</div>
+        <div class="stat-label">High Addiction Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">😴</div>
+        <div class="stat-value" style="color:var(--accent3)">{{ stats.avg_sleep }}h</div>
+        <div class="stat-label">Avg Sleep Hours</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-value" style="color:var(--success)">{{ stats.avg_academic }}%</div>
+        <div class="stat-label">Avg Academic Score</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="chip">Core Features</div>
+      <h2 class="section-title">WHAT WE OFFER</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card cyan">
+        <div class="feature-icon">🤖</div>
+        <div class="feature-title">KNN Prediction Engine</div>
+        <div class="feature-desc">K-Nearest Neighbors regression model trained on real teen behavioral data to predict daily phone usage hours with high accuracy.</div>
+      </div>
+      <div class="feature-card red">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Risk Classification</div>
+        <div class="feature-desc">Instant categorization into Low, Moderate, High, or Critical addiction levels with personalized intervention advice.</div>
+      </div>
+      <div class="feature-card purple">
+        <div class="feature-icon">📊</div>
+        <div class="feature-title">Interactive Dashboard</div>
+        <div class="feature-desc">Beautiful real-time charts and visualizations showing addiction patterns by age, grade, gender, and usage behavior.</div>
+      </div>
+      <div class="feature-card warn">
+        <div class="feature-icon">🔬</div>
+        <div class="feature-title">21-Feature Analysis</div>
+        <div class="feature-desc">Deep analysis across 21 behavioral and psychological dimensions including anxiety, sleep, academics, and social interactions.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <h2 class="cta-title">START PREDICTING NOW</h2>
+      <p class="cta-sub">Enter teen profile data and get instant addiction risk assessment powered by AI</p>
+      <a href="/predict" class="btn btn-primary" style="font-size:1.05rem; padding: 1rem 2.5rem;">
+        🤖 Launch Prediction Tool
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,543 @@
+{% extends "base.html" %}
+{% block title %}Predict Addiction — PhoneWatch AI{% endblock %}
+{% block content %}
+
+<style>
+  .predict-hero {
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+
+  .predict-title {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    letter-spacing: 4px;
+    margin-top: 0.75rem;
+  }
+
+  .predict-sub {
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  .predict-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (max-width: 900px) {
+    .predict-layout { grid-template-columns: 1fr; }
+  }
+
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+
+  .form-section-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  input, select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.6rem 0.85rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,229,255,0.08);
+  }
+
+  select option { background: var(--surface); }
+
+  .range-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    padding: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .range-val {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+    border-radius: 12px;
+  }
+
+  /* SIDEBAR */
+  .sidebar { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  /* Result card */
+  .result-card {
+    border-radius: 20px;
+    padding: 2rem;
+    border: 2px solid;
+    animation: fadeUp 0.4s ease;
+  }
+
+  .result-card.low { background: rgba(16,185,129,0.05); border-color: var(--success); }
+  .result-card.moderate { background: rgba(245,158,11,0.05); border-color: var(--warn); }
+  .result-card.high { background: rgba(255,77,109,0.07); border-color: var(--accent2); }
+  .result-card.critical { background: rgba(168,85,247,0.07); border-color: var(--accent3); }
+
+  .result-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-label.low { color: var(--success); }
+  .result-label.moderate { color: var(--warn); }
+  .result-label.high { color: var(--accent2); }
+  .result-label.critical { color: var(--accent3); }
+
+  .result-hours {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .result-hours.low { color: var(--success); }
+  .result-hours.moderate { color: var(--warn); }
+  .result-hours.high { color: var(--accent2); }
+  .result-hours.critical { color: var(--accent3); }
+
+  .result-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 0.25rem; }
+
+  .result-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 1rem;
+  }
+
+  .result-badge.low { background: var(--success); color: #000; }
+  .result-badge.moderate { background: var(--warn); color: #000; }
+  .result-badge.high { background: var(--accent2); color: #fff; }
+  .result-badge.critical { background: var(--accent3); color: #fff; }
+
+  .result-advice {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  /* Gauge */
+  .gauge-wrap {
+    text-align: center;
+    margin: 1rem 0;
+  }
+
+  /* Info card sidebar */
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+
+  .info-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .risk-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+
+  .risk-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .risk-dot.low { background: var(--success); }
+  .risk-dot.moderate { background: var(--warn); }
+  .risk-dot.high { background: var(--accent2); }
+  .risk-dot.critical { background: var(--accent3); }
+
+  .risk-range { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+
+  .error-box {
+    background: rgba(255,77,109,0.1);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 1rem;
+    color: var(--accent2);
+    font-size: 0.9rem;
+  }
+</style>
+
+<div class="container">
+  <div class="predict-hero">
+    <div class="chip">🤖 AI Prediction Engine</div>
+    <h1 class="predict-title">ADDICTION PREDICTOR</h1>
+    <p class="predict-sub">Fill in teen profile data below to predict daily phone usage</p>
+  </div>
+
+  <div class="predict-layout">
+    <!-- FORM -->
+    <div class="form-card">
+      <form method="POST" action="/predict">
+        <!-- Basic Info -->
+        <div class="form-section-title">// 01 — Basic Information</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Teen ID (optional)</label>
+            <input type="number" name="id" value="999" min="1" max="9999"/>
+          </div>
+          <div class="field">
+            <label>Age</label>
+            <input type="number" name="age" min="10" max="19" value="15" required/>
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select name="gender" required>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>School Grade</label>
+            <select name="school_grade" required>
+              <option value="7th">7th Grade</option>
+              <option value="8th">8th Grade</option>
+              <option value="9th" selected>9th Grade</option>
+              <option value="10th">10th Grade</option>
+              <option value="11th">11th Grade</option>
+              <option value="12th">12th Grade</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Health & Sleep -->
+        <div class="form-section-title">// 02 — Health & Wellbeing</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Sleep Hours / Night</label>
+            <div class="range-wrapper">
+              <input type="range" name="sleep_hours" min="3" max="12" step="0.5" value="7"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">7</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Exercise Hours / Day</label>
+            <div class="range-wrapper">
+              <input type="range" name="exercise_hours" min="0" max="5" step="0.5" value="1"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">1</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Anxiety Level (0–10)</label>
+            <div class="range-wrapper">
+              <input type="range" name="anxiety_level" min="0" max="10" step="1" value="4"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">4</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Depression Level (0–10)</label>
+            <div class="range-wrapper">
+              <input type="range" name="depression_level" min="0" max="10" step="1" value="3"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">3</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Self-Esteem (0–10)</label>
+            <div class="range-wrapper">
+              <input type="range" name="self_esteem" min="0" max="10" step="1" value="6"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">6</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Academic Performance (%)</label>
+            <div class="range-wrapper">
+              <input type="range" name="academic_performance" min="30" max="100" step="1" value="75"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">75</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Usage -->
+        <div class="form-section-title">// 03 — Phone Usage Patterns</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Phone Checks / Day</label>
+            <input type="number" name="phone_checks_per_day" min="0" max="300" value="60" required/>
+          </div>
+          <div class="field">
+            <label>Apps Used Daily</label>
+            <input type="number" name="apps_used_daily" min="0" max="50" value="12" required/>
+          </div>
+          <div class="field">
+            <label>Screen Time Before Bed (hrs)</label>
+            <div class="range-wrapper">
+              <input type="range" name="screen_time_before_bed" min="0" max="5" step="0.1" value="1.5"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">1.5</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Weekend Usage Hours</label>
+            <div class="range-wrapper">
+              <input type="range" name="weekend_usage_hours" min="0" max="16" step="0.5" value="7"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">7</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Time on Social Media (hrs)</label>
+            <div class="range-wrapper">
+              <input type="range" name="time_on_social_media" min="0" max="10" step="0.1" value="2.5"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">2.5</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Time on Gaming (hrs)</label>
+            <div class="range-wrapper">
+              <input type="range" name="time_on_gaming" min="0" max="10" step="0.1" value="1.5"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">1.5</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Time on Education (hrs)</label>
+            <div class="range-wrapper">
+              <input type="range" name="time_on_education" min="0" max="8" step="0.1" value="1"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">1</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Addiction Level (0–10)</label>
+            <div class="range-wrapper">
+              <input type="range" name="addiction_level" min="0" max="10" step="0.1" value="5"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social -->
+        <div class="form-section-title">// 04 — Social & Family</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Social Interactions / Day</label>
+            <input type="number" name="social_interactions" min="0" max="20" value="5" required/>
+          </div>
+          <div class="field">
+            <label>Family Communication (0–10)</label>
+            <div class="range-wrapper">
+              <input type="range" name="family_communication" min="0" max="10" step="1" value="5"
+                oninput="this.nextElementSibling.textContent=this.value"/>
+              <span class="range-val">5</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Parental Control (0/1)</label>
+            <select name="parental_control">
+              <option value="0">No Control (0)</option>
+              <option value="1">Has Control (1)</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary submit-btn">
+          🤖 Predict Daily Usage Hours
+        </button>
+      </form>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      {% if result %}
+        {% if result.error %}
+          <div class="error-box">⚠️ Error: {{ result.error }}</div>
+        {% else %}
+          <div class="result-card {{ result.risk_color }}">
+            <div class="result-label {{ result.risk_color }}">// Predicted Daily Usage</div>
+            <div class="result-hours {{ result.risk_color }}">{{ result.prediction }}h</div>
+            <div class="result-subtitle">hours per day on phone</div>
+
+            <div class="gauge-wrap">
+              <svg width="200" height="110" viewBox="0 0 200 110" id="gaugesvg">
+                <defs>
+                  <linearGradient id="gauge-grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#10b981"/>
+                    <stop offset="33%" stop-color="#f59e0b"/>
+                    <stop offset="66%" stop-color="#ff4d6d"/>
+                    <stop offset="100%" stop-color="#a855f7"/>
+                  </linearGradient>
+                </defs>
+                <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="#1e293b" stroke-width="16" fill="none" stroke-linecap="round"/>
+                <path d="M 20 100 A 80 80 0 0 1 180 100" stroke="url(#gauge-grad)" stroke-width="16" fill="none" stroke-linecap="round"
+                  stroke-dasharray="0 251" id="gaugeFill"/>
+                <circle cx="100" cy="100" r="7" fill="white" opacity="0.9"/>
+                <text x="100" y="75" text-anchor="middle" fill="#64748b" font-size="11" font-family="JetBrains Mono">{{ result.prediction }}h / 12h</text>
+              </svg>
+              <script>
+                (function(){
+                  var pct = Math.min({{ result.prediction }} / 12, 1.0);
+                  var dashLen = (pct * 251).toFixed(0);
+                  document.getElementById('gaugeFill').setAttribute('stroke-dasharray', dashLen + ' 251');
+                })();
+              </script>
+            </div>
+
+            <span class="result-badge {{ result.risk_color }}">{{ result.risk }} RISK</span>
+
+            <div class="result-advice">
+              💡 {{ result.advice }}
+            </div>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="info-card">
+          <div class="info-title">// Awaiting Input</div>
+          <p style="color:var(--muted); font-size:0.88rem; line-height:1.6; margin-bottom:1.2rem;">
+            Fill out the teen profile form and click Predict to see the AI-powered daily phone usage prediction.
+          </p>
+          <div style="background:var(--surface); border-radius:10px; padding:1rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--accent); line-height:1.8;">
+            MODEL: KNN Regressor<br/>
+            NEIGHBORS: k=2<br/>
+            FEATURES: 21<br/>
+            TARGET: Daily Hours<br/>
+            STATUS: <span style="color:var(--success)">● READY</span>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="info-card">
+        <div class="info-title">// Risk Levels</div>
+        <div class="risk-levels">
+          <div class="risk-row">
+            <div class="risk-dot low"></div>
+            <span>Low Risk</span>
+            <span class="risk-range" style="margin-left:auto">0–3h/day</span>
+          </div>
+          <div class="risk-row">
+            <div class="risk-dot moderate"></div>
+            <span>Moderate</span>
+            <span class="risk-range" style="margin-left:auto">3–5h/day</span>
+          </div>
+          <div class="risk-row">
+            <div class="risk-dot high"></div>
+            <span>High Risk</span>
+            <span class="risk-range" style="margin-left:auto">5–7h/day</span>
+          </div>
+          <div class="risk-row">
+            <div class="risk-dot critical"></div>
+            <span>Critical</span>
+            <span class="risk-range" style="margin-left:auto">&gt;7h/day</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-title">// Key Indicators</div>
+        <div style="display:flex; flex-direction:column; gap:0.6rem; font-size:0.82rem; color:var(--muted); line-height:1.5;">
+          <p>📱 Higher phone checks → more addiction</p>
+          <p>😴 Less sleep → higher usage risk</p>
+          <p>📚 Lower academic score → higher risk</p>
+          <p>👨‍👩‍👧 Strong family ties → lower risk</p>
+          <p>🏃 Exercise reduces addiction levels</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

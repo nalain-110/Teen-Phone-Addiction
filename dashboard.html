@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PhoneWatch AI{% endblock %}
+{% block content %}
+
+<style>
+  .dash-hero {
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+
+  .dash-title {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    letter-spacing: 4px;
+    margin-top: 0.75rem;
+  }
+
+  .dash-sub {
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (max-width: 768px) {
+    .charts-grid { grid-template-columns: 1fr; }
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+
+  .chart-card:hover { border-color: rgba(0,229,255,0.2); }
+
+  .chart-card.wide {
+    grid-column: 1 / -1;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+
+  .chart-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  canvas {
+    max-height: 280px;
+  }
+</style>
+
+<div class="container">
+  <div class="dash-hero">
+    <div class="chip">📊 Analytics Dashboard</div>
+    <h1 class="dash-title">INSIGHTS & TRENDS</h1>
+    <p class="dash-sub">Visual breakdown of teen phone addiction patterns from the dataset</p>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Addiction by Grade -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-label">// Grade Analysis</div>
+          <div class="chart-title">Addiction Level by School Grade</div>
+        </div>
+      </div>
+      <canvas id="gradeChart"></canvas>
+    </div>
+
+    <!-- Addiction by Gender -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-label">// Gender Breakdown</div>
+          <div class="chart-title">Avg Addiction Level by Gender</div>
+        </div>
+      </div>
+      <canvas id="genderChart"></canvas>
+    </div>
+
+    <!-- Usage Distribution -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-label">// Distribution</div>
+          <div class="chart-title">Daily Usage Hours Distribution</div>
+        </div>
+      </div>
+      <canvas id="usageChart"></canvas>
+    </div>
+
+    <!-- Anxiety vs Addiction Scatter -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-label">// Correlation</div>
+          <div class="chart-title">Anxiety Level vs Addiction Level</div>
+        </div>
+      </div>
+      <canvas id="scatterChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  const chartData = {{ chart_data | tojson }};
+
+  Chart.defaults.color = '#64748b';
+  Chart.defaults.borderColor = '#1e293b';
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+  const tooltipStyle = {
+    backgroundColor: '#0d1421',
+    borderColor: '#1e293b',
+    borderWidth: 1,
+    padding: 10,
+    titleColor: '#e2e8f0',
+    bodyColor: '#94a3b8',
+    cornerRadius: 8,
+  };
+
+  // Grade Chart
+  new Chart(document.getElementById('gradeChart'), {
+    type: 'bar',
+    data: {
+      labels: chartData.grade_labels,
+      datasets: [{
+        label: 'Avg Addiction Level',
+        data: chartData.grade_addiction,
+        backgroundColor: chartData.grade_labels.map((_, i) => `hsla(${180 + i * 25}, 80%, 60%, 0.75)`),
+        borderColor: chartData.grade_labels.map((_, i) => `hsl(${180 + i * 25}, 80%, 60%)`),
+        borderWidth: 2,
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle }
+      },
+      scales: {
+        y: {
+          grid: { color: '#1e293b' },
+          min: 0, max: 10,
+          ticks: { color: '#64748b' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#94a3b8' }
+        }
+      }
+    }
+  });
+
+  // Gender Chart
+  new Chart(document.getElementById('genderChart'), {
+    type: 'doughnut',
+    data: {
+      labels: chartData.gender_labels,
+      datasets: [{
+        data: chartData.gender_addiction,
+        backgroundColor: ['rgba(255,77,109,0.8)', 'rgba(0,229,255,0.8)', 'rgba(168,85,247,0.8)'],
+        borderColor: ['#ff4d6d', '#00e5ff', '#a855f7'],
+        borderWidth: 2,
+        hoverOffset: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94a3b8', padding: 16, usePointStyle: true }
+        },
+        tooltip: { ...tooltipStyle }
+      }
+    }
+  });
+
+  // Usage Distribution
+  new Chart(document.getElementById('usageChart'), {
+    type: 'bar',
+    data: {
+      labels: chartData.usage_labels,
+      datasets: [{
+        label: 'Number of Students',
+        data: chartData.usage_counts,
+        backgroundColor: [
+          'rgba(16,185,129,0.7)',
+          'rgba(245,158,11,0.7)',
+          'rgba(255,77,109,0.7)',
+          'rgba(168,85,247,0.7)',
+          'rgba(239,68,68,0.9)',
+        ],
+        borderColor: ['#10b981', '#f59e0b', '#ff4d6d', '#a855f7', '#ef4444'],
+        borderWidth: 2,
+        borderRadius: 8,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...tooltipStyle }
+      },
+      scales: {
+        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+      }
+    }
+  });
+
+  // Scatter Chart
+  const scatterData = chartData.scatter_anxiety.map((x, i) => ({
+    x: x,
+    y: chartData.scatter_addiction[i],
+    age: chartData.scatter_age[i]
+  }));
+
+  new Chart(document.getElementById('scatterChart'), {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Students',
+        data: scatterData,
+        backgroundColor: 'rgba(0,229,255,0.4)',
+        borderColor: 'rgba(0,229,255,0.7)',
+        borderWidth: 1,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltipStyle,
+          callbacks: {
+            label: (ctx) => `Anxiety: ${ctx.raw.x}, Addiction: ${ctx.raw.y}, Age: ${ctx.raw.age}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Anxiety Level', color: '#64748b' },
+          grid: { color: '#1e293b' },
+          ticks: { color: '#64748b' }
+        },
+        y: {
+          title: { display: true, text: 'Addiction Level', color: '#64748b' },
+          grid: { color: '#1e293b' },
+          ticks: { color: '#64748b' }
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}About — PhoneWatch AI{% endblock %}
+{% block content %}
+
+<style>
+  .about-section { padding: 4rem 0; }
+
+  .about-hero {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .about-title {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    letter-spacing: 4px;
+    margin: 0.75rem 0 0.5rem;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; } }
+
+  .about-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+
+  .about-card-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+  .about-card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+  .about-card-text { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+
+  .model-specs {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .spec-table td {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .spec-table td:first-child { color: var(--muted); width: 40%; }
+  .spec-table td:last-child { font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); }
+
+  .features-list {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+  }
+
+  .feat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 700px) { .feat-grid { grid-template-columns: 1fr 1fr; } }
+
+  .feat-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .feat-item::before {
+    content: '◆';
+    color: var(--accent);
+    font-size: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .section-mono {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+</style>
+
+<div class="container">
+  <div class="about-section">
+    <div class="about-hero">
+      <div class="chip">🔬 Research Project</div>
+      <h1 class="about-title">ABOUT THE PROJECT</h1>
+      <p style="color:var(--muted); max-width:540px; margin:0 auto;">
+        A machine learning system designed to detect and predict smartphone addiction levels in teenagers
+      </p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <div class="about-card-icon">🎯</div>
+        <div class="about-card-title">Project Goal</div>
+        <div class="about-card-text">
+          To develop an AI-powered tool that predicts daily phone usage hours in teenagers
+          based on behavioral, psychological, and social factors — enabling early intervention
+          for at-risk youth before addiction becomes severe.
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">📊</div>
+        <div class="about-card-title">Dataset</div>
+        <div class="about-card-text">
+          The model is trained on a comprehensive dataset of teen behavioral patterns including
+          sleep habits, academic performance, anxiety levels, social media usage, gaming time,
+          family dynamics, and psychological indicators.
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🤖</div>
+        <div class="about-card-title">ML Algorithm</div>
+        <div class="about-card-text">
+          K-Nearest Neighbors (KNN) Regression with k=2 neighbors is used to predict
+          daily phone usage hours. The model learns from similar teen profiles to make
+          accurate predictions on new, unseen data.
+        </div>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🚨</div>
+        <div class="about-card-title">Impact</div>
+        <div class="about-card-text">
+          Early detection of phone addiction can help parents, educators, and counselors
+          take timely action. Our risk classification system provides actionable advice
+          tailored to the severity level detected.
+        </div>
+      </div>
+    </div>
+
+    <!-- Model Specs -->
+    <div class="model-specs">
+      <div class="section-mono">// Model Specifications</div>
+      <h2 style="font-size:1.2rem; margin-bottom:0.5rem;">Technical Details</h2>
+      <table class="spec-table">
+        <tr><td>Algorithm</td><td>K-Nearest Neighbors Regressor</td></tr>
+        <tr><td>Neighbors (k)</td><td>2</td></tr>
+        <tr><td>Input Features</td><td>21 behavioral & psychological features</td></tr>
+        <tr><td>Target Variable</td><td>Daily_Usage_Hours (continuous)</td></tr>
+        <tr><td>Preprocessing</td><td>Label Encoding (Gender, School Grade)</td></tr>
+        <tr><td>Framework</td><td>scikit-learn + Flask + Chart.js</td></tr>
+        <tr><td>Model Format</td><td>Pickle (.pkl)</td></tr>
+        <tr><td>Risk Classification</td><td>4 levels: Low / Moderate / High / Critical</td></tr>
+      </table>
+    </div>
+
+    <!-- Features -->
+    <div class="features-list">
+      <div class="section-mono">// Input Features</div>
+      <h2 style="font-size:1.2rem; margin-bottom:0.25rem;">21 Prediction Features</h2>
+      <p style="color:var(--muted); font-size:0.85rem; margin-bottom:0.5rem;">All features used by the KNN model</p>
+      <div class="feat-grid">
+        <div class="feat-item">ID</div>
+        <div class="feat-item">Age</div>
+        <div class="feat-item">Gender</div>
+        <div class="feat-item">School Grade</div>
+        <div class="feat-item">Sleep Hours</div>
+        <div class="feat-item">Academic Performance</div>
+        <div class="feat-item">Social Interactions</div>
+        <div class="feat-item">Exercise Hours</div>
+        <div class="feat-item">Anxiety Level</div>
+        <div class="feat-item">Depression Level</div>
+        <div class="feat-item">Self Esteem</div>
+        <div class="feat-item">Parental Control</div>
+        <div class="feat-item">Screen Time Bed</div>
+        <div class="feat-item">Phone Checks/Day</div>
+        <div class="feat-item">Apps Used Daily</div>
+        <div class="feat-item">Time Social Media</div>
+        <div class="feat-item">Time Gaming</div>
+        <div class="feat-item">Time Education</div>
+        <div class="feat-item">Family Communication</div>
+        <div class="feat-item">Weekend Usage</div>
+        <div class="feat-item">Addiction Level</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
